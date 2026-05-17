@@ -1,0 +1,4 @@
+{$PCLOUD_RELAY_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy relay:7070
+}

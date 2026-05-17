@@ -1,0 +1,39 @@
+services:
+  relay:
+    build:
+      context: .
+    image: pcloud-relay-server:latest
+    restart: unless-stopped
+    environment:
+      PCLOUD_RELAY_BIND: 0.0.0.0:7070
+      PCLOUD_RELAY_TOKEN: ${PCLOUD_RELAY_TOKEN:?set PCLOUD_RELAY_TOKEN in .env}
+      PCLOUD_RELAY_REQUEST_TIMEOUT_SECONDS: ${PCLOUD_RELAY_REQUEST_TIMEOUT_SECONDS:-3600}
+      PCLOUD_RELAY_MAX_BODY_BYTES: ${PCLOUD_RELAY_MAX_BODY_BYTES:-5368709120}
+    ports:
+      - "127.0.0.1:7070:7070"
+    networks:
+      - relay
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      PCLOUD_RELAY_DOMAIN: ${PCLOUD_RELAY_DOMAIN:?set PCLOUD_RELAY_DOMAIN in .env}
+    depends_on:
+      - relay
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - relay
+
+networks:
+  relay:
+
+volumes:
+  caddy-data:
+  caddy-config:

@@ -263,3 +263,22 @@ fn build_proxy_response(
 
     response
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn proxied_path_strips_device_prefix() {
+        let uri = "/d/device-1/api/files?limit=20".parse::<Uri>().unwrap();
+
+        assert_eq!(proxied_path("device-1", &uri), "/api/files?limit=20");
+    }
+
+    #[test]
+    fn proxied_path_maps_device_root_to_slash() {
+        let uri = "/d/device-1".parse::<Uri>().unwrap();
+
+        assert_eq!(proxied_path("device-1", &uri), "/");
+    }
+}
